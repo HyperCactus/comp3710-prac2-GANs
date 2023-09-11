@@ -9,9 +9,9 @@ import time
 import os
 
 # --------------- Hyperparameters 
-n_epochs = 1
+n_epochs = 4
 learning_rate = 0.001
-batch_size = 64
+batch_size = 82
 nz = 100 # size of generator input
 ngf = 32#64 # size of feature maps in generator
 ndf = 32#64 # size of feature maps in discriminator
@@ -118,6 +118,8 @@ images_generated = []
 noise = torch.randn(64, nz, 1, 1, device=device) # 64 random inputs for generator
 start_time = time.time()
 print('> Training starting ...')
+times = []
+batch_times = []
 
 for epoch in range(n_epochs):
     gan.train()
@@ -168,11 +170,20 @@ for epoch in range(n_epochs):
         
         # print progress
         if (i+1) % 1 == 0:
+            times.append(time.time()) # calculate estimated time remaining
+            eta = 'estimating ...'
+            if len(times) > 2:
+                batch_time = times[-1] - times[-2]
+                batch_times.append(batch_time)
+                mean_batch_time = np.mean(batch_times)
+                eta = (len(dataloader) - i) * mean_batch_time * (n_epochs - epoch)
+                # convert to hours, minutes and seconds
+                eta = f'{eta//3600:.0f}h {(eta%3600)//60:.0f}m {(eta%60):.0f}s'
             print(f'Epoch [{epoch+1}/{n_epochs}], Step [{i+1}/{len(dataloader)}], '
                   f'Discriminator Loss: {disc_total_loss.item():.4f}, '
                   f'Generator Loss: {gen_loss.item():.4f}, '
                   f'Discriminator Accuracy on Real: {acc_real:.4f}, '
-                  f'Discriminator Accuracy on Fake: {acc_fake:.4f}')
+                  f'Discriminator Accuracy on Fake: {acc_fake:.4f}, ETA: {eta}')
             
     # generate and save images for evaluation
     with torch.no_grad():
