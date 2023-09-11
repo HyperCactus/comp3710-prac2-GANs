@@ -203,7 +203,8 @@ plt.legend()
 plt.show()
 
 # save the model 
-torch.save(gan.state_dict(), 'models/gan.pth')
+torch.save(gan.state_dict(), str(current_dir)+'/models/gan.pth')
+print('Model saved to models/gan.pth')
 
 
 
